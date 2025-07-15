@@ -11,7 +11,7 @@ export default function Navigation() {
       <div class="flex flex-row gap-5 items-center text-white">
         <a href="/blog">blog</a>
         <a href="/projects">project</a>
-        <a href="/github">github</a>
+        <a href="https://github.com/jeffcshelton">github</a>
         <Button
           href="/resume.pdf"
           rel="noopener noreferrer"

@@ -1,11 +1,11 @@
 export default function Index() {
-  return <>
+  return (
     <main class="flex flex-row items-center justify-center w-fit">
       <img class="h-1/2 w-1/2 shadow-[12px_12px]" src="/portrait.jpg" />
       <p class="px-10 text-white font-[Space_Mono]">
         hi, i'm <b>jeff shelton</b>:<br />
 
-        <span class="text-red-400"><b>+</b></span> cofounder @&nbsp;
+        <span class="text-red-400"><b>+</b></span> cofounder, ceo @&nbsp;
         <span class="text-blue-500"><b>portal labs</b></span><br />
 
         <span class="text-orange-300"><b>+</b></span> computer science @&nbsp;
@@ -23,7 +23,7 @@ export default function Index() {
         <span class="text-violet-400"><b>+</b></span> musician
       </p>
     </main>
-  </>;
+  );
 }
 
 
