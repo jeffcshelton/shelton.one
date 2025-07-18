@@ -14,7 +14,9 @@ export default function Index() {
         render="decay"
         rule="conway"
       />
+
       <Navigation />
+
       <main class="flex flex-1 flex-row items-center justify-center overflow-auto">
         <img class="h-2/3 shadow-[12px_12px]" src="/portrait.jpg" />
         <p class="px-20 text-white text-xl font-mono">
