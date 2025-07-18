@@ -1,16 +1,10 @@
 import { Automata, Navigation } from "@/components";
-import { CellState } from "@/components/Automata";
 
 export default function Index() {
-  const automataColors = {
-    [CellState.ALIVE]: [255, 255, 255, 50],
-  };
-
   return (
     <div class="w-screen h-screen flex flex-col">
       <Automata
         class="absolute -z-10 inset-0 w-screen h-screen"
-        colors={automataColors}
         render="decay"
         rule="conway"
       />

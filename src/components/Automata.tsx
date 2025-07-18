@@ -220,8 +220,8 @@ export type Props = {
 
 const DEFAULT_COLORS = {
   [CellState.DEAD]: [255, 255, 255, 0],
-  [CellState.ALIVE]: [255, 255, 255, 255],
-  [CellState.DYING]: [127, 127, 127, 255],
+  [CellState.ALIVE]: [255, 255, 255, 50],
+  [CellState.DYING]: [127, 127, 127, 50],
 };
 
 /**
