@@ -1,9 +1,9 @@
-import { Automata } from "@/components";
+import { Automaton } from "@/components";
 
 export default function Sandbox() {
   return (
     <main>
-      <Automata class="w-screen h-screen" render="decay" rule="conway" />
+      <Automaton class="w-screen h-screen" render="decay" rule="conway" />
     </main>
   );
 }

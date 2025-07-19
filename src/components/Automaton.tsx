@@ -9,57 +9,122 @@ export const enum CellState {
   DYING,
 }
 
-export type CellGrid = CellState[][];
+export class CellGrid {
+  readonly width: number;
+  readonly height: number;
+  readonly area: number;
 
-/**
- * Generates a 2D array of random cells.
- *
- * @param width - The width of the canvas, indexed second.
- * @param height - The height of the canvas, indexed first.
- * @returns A 2D array of random cells.
- */
-function randomCells(
-  width: number,
-  height: number,
-): [CellGrid, CellGrid] {
-  const front = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () =>
-      Math.random() < 0.9 ? CellState.DEAD : CellState.ALIVE
-    )
-  );
+  readonly front: Uint8Array;
+  readonly back: Uint8Array;
 
-  const back = Array.from({ length: height }, () =>
-    new Array(width).fill(CellState.DEAD)
-  );
+  useFront = false;
 
-  return [front, back];
-}
+  constructor(width: number, height: number, old?: CellGrid | null) {
+    this.width = width;
+    this.height = height;
+    this.area = width * height;
 
-function countNeighbors(grid: CellGrid, x: number, y: number) {
-  let neighbors = 0;
+    this.front = new Uint8Array(this.area);
 
-  // Count all live neighbors of the cell (including itself) in a 3x3 square.
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      // If the neighboring cell is alive, increment the count.
-      if (grid[y + dy] && grid[y + dy][x + dx] === CellState.ALIVE) {
-        neighbors++;
+    if (old) {
+      this.copy(old);
+    } else {
+      this.randomize(0.9);
+    }
+
+    this.back = new Uint8Array(this.front);
+  }
+
+  private randomize(live: number) {
+    for (let i = 0; i < this.front.length; i++) {
+      this.front[i] = Math.random() < live
+        ? CellState.DEAD
+        : CellState.ALIVE;
+    }
+  }
+
+  private copy(src: CellGrid) {
+    const srcArr = src.useFront ? src.front : src.back;
+    const minWidth = Math.min(this.width, src.width);
+    const minHeight = Math.min(this.height, src.height);
+
+    let srcOffset = 0;
+    let dstOffset = 0;
+
+    for (let y = 0; y < minHeight; y++) {
+      const srcRow = srcArr.subarray(srcOffset, srcOffset + minWidth);
+      const dstRow = this.front.subarray(dstOffset, dstOffset + this.width);
+      dstRow.set(srcRow, 0);
+
+      // Generate new columns if necessary.
+      if (this.width > src.width) {
+        for (let x = src.width; x < this.width; x++) {
+          dstRow[x] = Math.random() < 0.9
+            ? CellState.DEAD
+            : CellState.ALIVE;
+        }
+      }
+
+      srcOffset += src.width;
+      dstOffset += this.width;
+    }
+
+    // Generate new rows if necessary.
+    if (this.height > src.height) {
+      for (; srcOffset < this.area; srcOffset++) {
+        this.front[srcOffset] = Math.random() < 0.9
+          ? CellState.DEAD
+          : CellState.ALIVE;
       }
     }
   }
 
-  // Account for over-counting a live self.
-  if (grid[y][x] === CellState.ALIVE) {
-    neighbors--;
+  private active(): Uint8Array {
+    return this.useFront ? this.front : this.back;
   }
 
-  return neighbors;
+  private inactive(): Uint8Array {
+    return this.useFront ? this.back : this.front;
+  }
+
+  index(x: number, y: number): CellState | undefined {
+    return this.inactive()[y * this.width + x];
+  }
+
+  set(x: number, y: number, state: CellState) {
+    this.active()[y * this.width + x] = state;
+  }
+
+  neighbors(x: number, y: number) {
+    let neighbors = 0;
+
+    // Count all live neighbors of the cell (including itself) in a 3x3 square.
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        // If the neighboring cell is alive, increment the count.
+        if (this.index(x + dx, y + dy) === CellState.ALIVE) {
+          neighbors++;
+        }
+      }
+    }
+
+    // Account for over-counting a live self.
+    if (this.index(x, y) === CellState.ALIVE) {
+      neighbors--;
+    }
+
+    return neighbors;
+  }
+
+  swap() {
+    this.useFront = !this.useFront;
+  }
 }
 
-function conwayLife(last: CellGrid, next: CellGrid) {
-  for (let y = 0; y < last.length; y++) {
-    for (let x = 0; x < last[y].length; x++) {
-      const neighbors = countNeighbors(last, x, y);
+function conwayLife(grid: CellGrid, spawn: number) {
+  for (let y = 0; y < grid.height; y++) {
+    for (let x = 0; x < grid.width; x++) {
+      const neighbors = grid.neighbors(x, y);
 
       // Conway's Game of Life rules:
       // 1. Any live cell with fewer than two neighbors dies.
@@ -68,7 +133,7 @@ function conwayLife(last: CellGrid, next: CellGrid) {
       // 4. Any dead cell with exactly three neighbors becomes live.
 
       let alive;
-      switch (last[y][x]) {
+      switch (grid.index(x, y)) {
       case CellState.DEAD:
         alive = neighbors === 3;
         break;
@@ -77,44 +142,47 @@ function conwayLife(last: CellGrid, next: CellGrid) {
         break;
       }
 
-      next[y][x] = alive ? CellState.ALIVE : CellState.DEAD;
+      grid.set(x, y, alive ? CellState.ALIVE : CellState.DEAD);
     }
   }
 
-  // Randomly choose 0.005% of cells to make live.
-  const area = last[0] ? last.length * last[0].length : 0;
-  const spawn = area * 0.00005;
+  // Choose a random selection of cells to make live.
+  const spawnCount = grid.area * spawn;
 
-  for (let r = 0; r < spawn; r++) {
-    const y = Math.floor(Math.random() * last.length);
-    const x = Math.floor(Math.random() * last[y].length);
+  for (let r = 0; r < spawnCount; r++) {
+    const x = Math.floor(Math.random() * grid.width);
+    const y = Math.floor(Math.random() * grid.height);
 
-    next[y][x] = CellState.ALIVE;
+    grid.set(x, y, CellState.ALIVE);
   }
+
+  grid.swap();
 }
 
-function brianBrain(last: CellGrid, next: CellGrid) {
-  for (let y = 0; y < last.length; y++) {
-    for (let x = 0; x < last[y].length; x++) {
+function brianBrain(grid: CellGrid) {
+  for (let y = 0; y < grid.height; y++) {
+    for (let x = 0; x < grid.width; x++) {
       // Brian's Brain rules:
       // 1. Any dead cell with exactly two neighbors becomes live.
       // 2. Any live cell becomes dying.
       // 3. Any dying cell becomes dead.
 
-      switch (last[y][x]) {
+      switch (grid.index(x, y)) {
       case CellState.DEAD:
-        const neighbors = countNeighbors(last, x, y);
-        next[y][x] = neighbors === 2 ? CellState.ALIVE : CellState.DEAD;
+        const neighbors = grid.neighbors(x, y);
+        grid.set(x, y, neighbors === 2 ? CellState.ALIVE : CellState.DEAD);
         break;
       case CellState.ALIVE:
-        next[y][x] = CellState.DYING;
+        grid.set(x, y, CellState.DYING);
         break;
       case CellState.DYING:
-        next[y][x] = CellState.DEAD;
+        grid.set(x, y, CellState.DEAD);
         break;
       }
     }
   }
+
+  grid.swap();
 }
 
 /**
@@ -136,7 +204,7 @@ function renderReplace(
   // Color each pixel according to whether the corresponding cell is alive.
   for (let y = 0; y < frame.height; y++) {
     for (let x = 0; x < frame.width; x++, px += 4) {
-      const color = colors[grid[y][x]];
+      const color = colors[grid.index(x, y)!];
 
       for (let c = 0; c < color.length; c++) {
         frame.data[px + c] = color[c];
@@ -165,7 +233,7 @@ function renderDecay(
 
   for (let y = 0; y < frame.height; y++) {
     for (let x = 0; x < frame.width; x++, px += 4) {
-      const state = grid[y][x];
+      const state = grid.index(x, y)!;
       const color = colors[state];
 
       for (let c = 0; c < 4; c++) {
@@ -180,42 +248,37 @@ function renderDecay(
 }
 
 /**
- * Resize a cell grid into another image data frame, copying old data.
- *
- * @param context - The rendering context used to create the new buffer.
- * @param frame - The old frame to be resized.
- * @param width - The width of the new frame.
- * @param height - The height of the new frame.
+ * Properties for an Automaton component.
  */
-function resizeGrid(
-  grid: CellGrid,
-  width: number,
-  height: number,
-) {
-  for (let y = grid.length; y < height; y++) {
-    grid[y] = [];
-  }
-
-  grid.length = height;
-
-  for (let y = 0; y < height; y++) {
-    const row = grid[y];
-
-    for (let x = row.length; x < width; x++) {
-      row[x] = Math.random() < 0.9 ? CellState.DEAD : CellState.ALIVE;
-    }
-
-    row.length = width;
-  }
-}
-
 export type Props = {
+  /** Additional classes to be applied. */
   class?: string,
+
+  /** Color overrides for specified cell states. */
   colors?: Partial<Record<CellState, number[]>>,
+
+  /** The rendering speed, in frames per second. */
   fps?: number,
+
+  /** The update rule for the cells. */
   rule?: "conway" | "brian",
+
+  /**
+   * The cell rendering rule.
+   */
   render?: "replace" | "decay",
+
+  /**
+   * The dimensions of the grid canvas, or "dynamic" for it to be automatically
+   * determined based on layout size.
+   */
   size?: [number, number] | "dynamic",
+
+  /**
+   * The rate, in percent of the total area per second, at which cells are
+   * randomly selected to be made live.
+   */
+  spawnRate?: number,
 };
 
 const DEFAULT_COLORS = {
@@ -225,13 +288,16 @@ const DEFAULT_COLORS = {
 };
 
 /**
- * The Automata component.
+ * A component rendering a cellular automaton with defined rules.
  *
  * @param props - The properties of the component.
  */
-export default function Automata(props: Props) {
+export default function Automaton(props: Props) {
   const fps = props.fps !== undefined ? props.fps : 20;
   const frameRate = 1000.0 / fps;
+
+  const spawnRate = props.spawnRate !== undefined ? props.spawnRate : 0.001;
+  const spawnPerFrame = spawnRate / fps;
 
   let updateCells = conwayLife;
   if (props.rule === "brian") {
@@ -255,10 +321,8 @@ export default function Automata(props: Props) {
     context.imageSmoothingEnabled = false;
 
     let resizeObserver: ResizeObserver | undefined;
-    let front: CellGrid | null = null;
-    let back: CellGrid | null = null;
+    let grid: CellGrid | null = null;
 
-    let frontLast = true;
     let running = true;
     let lastTime = 0;
 
@@ -283,18 +347,11 @@ export default function Automata(props: Props) {
 
         if (width <= 0 || height <= 0) {
           frame = null;
-          front = null;
-          back = null;
+          grid = null;
           return;
         }
 
-        if (front && back) {
-          resizeGrid(front, width, height);
-          resizeGrid(back, width, height);
-        } else {
-          [front, back] = randomCells(width, height);
-        }
-
+        grid = new CellGrid(width, height, grid);
         frame = context.createImageData(width, height);
       });
 
@@ -303,7 +360,7 @@ export default function Automata(props: Props) {
       const [width, height] = props.size as number[];
 
       frame = context.createImageData(width, height);
-      [front, back] = randomCells(width, height);
+      grid = new CellGrid(width, height);
     }
 
     function tick(time: number) {
@@ -312,26 +369,18 @@ export default function Automata(props: Props) {
 
       // Wait until the frame timing aligns with the frame rate.
       // Also wait until the first resize event has been captured.
-      if (time - lastTime < frameRate || !frame || !front || !back) {
+      if (time - lastTime < frameRate || !frame || !grid) {
         requestAnimationFrame(tick);
         return;
       }
 
       lastTime = time;
 
-      // Update cells in the front or back buffer depending on which was last.
-      if (frontLast) {
-        updateCells(front, back);
-        drawCells(back, colors, frame);
-      } else {
-        updateCells(back, front);
-        drawCells(front, colors, frame);
-      }
+      updateCells(grid, spawnPerFrame);
+      drawCells(grid, colors, frame);
 
       // Push the image data onto the canvas.
       context.putImageData(frame, 0, 0);
-      frontLast = !frontLast;
-
       requestAnimationFrame(tick);
     }
 

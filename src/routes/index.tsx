@@ -1,9 +1,9 @@
-import { Automata, Navigation } from "@/components";
+import { Automaton, Navigation } from "@/components";
 
 export default function Index() {
   return (
     <div class="w-screen h-screen flex flex-col">
-      <Automata
+      <Automaton
         class="absolute -z-10 inset-0 w-screen h-screen"
         render="decay"
         rule="conway"
