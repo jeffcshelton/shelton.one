@@ -1,0 +1,69 @@
+---
+title: Navigating NixOS on Multiple Machines
+---
+
+# Introduction
+
+About a year ago, I discovered NixOS. The perfect reproducibility of a certain
+configuration really intrigued me, so I decided to set it up in a virtual
+machine. After a while (maybe _too long_) figuring out how the package manager
+and system configuration work (and I'm not entirely sure I do have it figured
+out), I decided to install it on my main machines.
+
+That's right, _machines_. Like many developers, I have multiple computers:
+- An x86-64 desktop workstation.
+- A Macbook Pro running macOS.
+- Various virtual machines in Parallels and VirtualBox.
+- Multiple Raspberry Pis used as servers.
+
+The whole point of NixOS is to provide a reproducible environment, and I wanted
+that across different machines, so that I could migrate from one computer to the
+other and retain all of my programs, configuration, and environments. But with
+such a variety of platforms and even operating systems (yes, I want to keep
+running macOS; more on that later), this seemed like a near impossible task.
+
+Well, it took a while to make this a reality, but today I have a single
+configuration that can be applied to **all** of these different systems, and it
+can even be quickly applied to new systems to set them up! NixOS is known for
+having somewhat confusing documentation and error messages, especially for
+beginners, so I'd like to guide you through that process.
+
+If you're already knowledgeable about Nix and just want to take inspiration from
+my configuration, it's on GitHub [here](https://github.com/jeffcshelton/dotfiles).
+
+# What's a Nix?
+
+
+## NixOS
+
+## nix-darwin
+
+## One Configuration
+
+## Direnv
+
+[...]
+
+"This sounds great and all, but if I have to convince my entire company to use
+NixOS for this to work, then it's a no-go."
+
+Good news, you don't! Direnv can be installed . And if your friends, coworkers,
+or IT department are still especially resistant to installing direnv, then the
+`shell.nix` or `flake.nix` can always act as a package listing. They can still
+look at the Nix files to determine what packages they need to install on their
+standard package manager, so it's a win-win.
+
+## Neovim
+
+**NOTE**: If you're not a Neovim user (and are not interested in becoming one),
+you may just want to skip this section. NixOS works perfectly fine with other
+editors like VS Code and Emacs, but I don't use those.
+
+When configuring Neovim in NixOS, there are a couple things to keep in mind.
+
+Some Nix users reach for home-manager to configure Neovim. While I think
+home-manager is a great tool for _some things_, I don't think it's a great
+choice for Neovim.
+
+- Do you want your Neovim to work on non-Nix machines?
+- Do you really want to write Lua in strings?
