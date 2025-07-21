@@ -2,7 +2,11 @@ import { defineConfig } from "@solidjs/start/config";
 import tailwind from "@tailwindcss/vite";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import mdx from "@mdx-js/rollup";
+
+/* @ts-ignore */
+import pkg from "@vinxi/plugin-mdx";
+
+const { default: mdx } = pkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,9 +21,9 @@ export default defineConfig({
       },
     },
     plugins: [
-      mdx({
+      mdx.withImports({})({
         jsx: true,
-        jsxImportSource: "solid-jsx",
+        jsxImportSource: "solid-js",
         providerImportSource: "solid-mdx",
       }),
       tailwind(),

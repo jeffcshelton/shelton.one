@@ -21,9 +21,9 @@ function Post(props: PostProps) {
 
 export default function Blog() {
   return (
-    <div class="flex flex-col">
+    <div class="flex flex-col w-full h-full">
       <Automaton
-        class="absolute -z-10 inset-0 w-screen h-screen"
+        class="absolute -z-10 inset-0 w-full h-full"
         render="decay"
         rule="conway"
       />
