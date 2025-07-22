@@ -1,4 +1,5 @@
 import { JSX } from "solid-js";
+import { addClass } from "../util";
 
 type Props = {
   children: JSX.Element,
@@ -9,12 +10,14 @@ type Props = {
 };
 
 export default function Button(props: Props) {
-  const shadow = "shadow-[4px_4px_oklch(50%_0.134_242.749_/_0.2)]";
-  const hover = "hover:shadow-[3px_3px_oklch(50%_0.134_242.749_/_0.2)] hover:translate-px";
-  const active = "hover:active:shadow-[2px_2px_oklch(50%_0.134_242.749_/_0.2)] hover:active:translate-[2px]";
+  const style = "bg-sky-700 font-mono font-bold text-white p-3";
+
+  const shadow = "shadow-[4px_4px] shadow-sky-900";
+  const hover = "hover:shadow-[3px_3px] hover:translate-px";
+  const active = "hover:active:shadow-[2px_2px] hover:active:translate-[2px]";
 
   return <a
-    class={`bg-sky-700 font-mono font-bold text-white p-3 ${shadow} ${hover} ${active} ${props.class}`}
+    class={addClass(style, shadow, hover, active, props.class)}
     href={props.href}
     rel={props.rel}
     target={props.target}

@@ -1,0 +1,62 @@
+article {
+  width: 100%;
+  max-width: 80ch;
+
+  color: black;
+
+  font-family: 'Cascadia Mono';
+}
+
+article header .title {
+  font-size: 2rem;
+}
+
+article header .author {
+  font-style: italic;
+}
+
+article header .date {
+
+}
+
+article a {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+article h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+
+  padding-top: 1.5rem;
+}
+
+article h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+
+  padding-top: 1rem;
+}
+
+article p {
+  padding: 0.5rem 0;
+}
+
+article ol {
+  list-style-type: decimal;
+  margin-left: 4ch;
+  padding: 0.5rem 0;
+}
+
+article ul {
+  list-style-type: square;
+  padding: 0.5rem 0;
+  margin-left: 3ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  article {
+    color: white;
+  }
+}

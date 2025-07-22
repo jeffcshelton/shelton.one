@@ -3,6 +3,9 @@ import tailwind from "@tailwindcss/vite";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+
 /* @ts-ignore */
 import pkg from "@vinxi/plugin-mdx";
 
@@ -24,6 +27,10 @@ export default defineConfig({
       mdx.withImports({})({
         jsx: true,
         jsxImportSource: "solid-js",
+        remarkPlugins: [
+          remarkFrontmatter,
+          [remarkMdxFrontmatter, { name: "frontmatter" }],
+        ],
         providerImportSource: "solid-mdx",
       }),
       tailwind(),

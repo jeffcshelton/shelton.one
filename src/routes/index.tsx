@@ -19,7 +19,7 @@ export default function Index() {
           <span class="text-red-400 font-bold">+</span> cofounder, ceo @&nbsp;
           <span class="text-blue-500 font-bold">portal labs</span><br />
 
-          <span class="text-orange-300 font-bold">+</span> computer science @&nbsp;
+          <span class="text-orange-300 font-bold">+</span> m.s. computer science @&nbsp;
           <span class="text-yellow-300 font-bold">georgia tech</span><br />
 
           <span class="text-lime-300 font-bold">+</span> director of avionics @&nbsp;

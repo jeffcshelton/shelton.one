@@ -8,11 +8,13 @@
     "version": "vinxi version"
   },
   "dependencies": {
-    "@mdx-js/rollup": "^3.1.0",
+    "@mdx-js/mdx": "2.3.0",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.15.3",
     "@solidjs/start": "^1.0.11",
     "@vinxi/plugin-mdx": "^3.7.2",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx-frontmatter": "^5.2.0",
     "solid-js": "^1.9.7",
     "solid-mdx": "^0.0.7",
     "vinxi": "^0.5.8"

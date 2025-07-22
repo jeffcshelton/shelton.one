@@ -1,16 +1,23 @@
+---
+title: NixOS Everywhere
+author: Jeff Shelton
+date: 2025-07-21
+description: How to set up a single NixOS configuration that rules them all.
+---
+
 # Introduction
 
-About a year ago, I discovered NixOS. The perfect reproducibility of a certain
+About a year ago, I discovered [NixOS](https://nixos.org). The perfect reproducibility of a certain
 configuration really intrigued me, so I decided to set it up in a virtual
 machine. After a while (maybe _too long_) figuring out how the package manager
 and system configuration work (and I'm not entirely sure I do have it figured
 out), I decided to install it on my main machines.
 
 That's right, _machines_. Like many developers, I have multiple computers:
-- An x86-64 desktop workstation.
-- A Macbook Pro running macOS.
-- Various virtual machines in Parallels and VirtualBox.
-- Multiple Raspberry Pis used as servers.
+1. An x86-64 desktop workstation.
+2. A Macbook Pro running macOS.
+3. Various virtual machines in Parallels and VirtualBox.
+4. Multiple Raspberry Pis used as servers.
 
 The whole point of NixOS is to provide a reproducible environment, and I wanted
 that across different machines, so that I could migrate from one computer to the
@@ -29,10 +36,31 @@ my configuration, it's on GitHub [here](https://github.com/jeffcshelton/dotfiles
 
 # What's a Nix?
 
+Surprisingly, Nix has been around for a long time...
 
 ## NixOS
 
 ## nix-darwin
+
+## Design Decisions
+
+Unfortunately, there are a lot of ways to do things "right" in NixOS. Among the
+different choices for system design, here are a few:
+
+- Flakes or no flakes?
+- home-manager or base configuration?
+- Homebrew or Nix packages? (macOS only)
+- Monolithic configuration or split?
+
+To eliminate some headache, I've made a few decisions for you:
+
+- Flakes.
+- Base configuration.
+- Homebrew.
+- Split.
+
+Look into the other options if you wish, but these decisions are totally
+sensible, and I haven't run into any issues with them so far.
 
 ## One Configuration
 
@@ -43,11 +71,13 @@ my configuration, it's on GitHub [here](https://github.com/jeffcshelton/dotfiles
 "This sounds great and all, but if I have to convince my entire company to use
 NixOS for this to work, then it's a no-go."
 
-Good news, you don't! Direnv can be installed . And if your friends, coworkers,
-or IT department are still especially resistant to installing direnv, then the
-`shell.nix` or `flake.nix` can always act as a package listing. They can still
-look at the Nix files to determine what packages they need to install on their
-standard package manager, so it's a win-win.
+Good news, you don't! Direnv can be installed on pretty much any operating
+system except Windows. Even on Windows, you can install it through WSL.
+
+And if your friends, coworkers, or IT department are still especially resistant
+to installing direnv, then the `shell.nix` or `flake.nix` can always act as a
+package listing. They can still look at the Nix files to determine what packages
+they need to install on their standard package manager, so it's a win-win.
 
 ## Neovim
 
