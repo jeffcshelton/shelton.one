@@ -4,7 +4,7 @@ export default function Index() {
   return (
     <div class="w-screen h-screen flex flex-col">
       <Automaton
-        class="absolute -z-10 inset-0 w-screen h-screen"
+        class="absolute -z-10 inset-0 w-full h-full"
         render="decay"
         rule="conway"
       />

@@ -16,18 +16,26 @@ export default function Navigation() {
     ?.[0];
 
   return (
-    <div class="flex flex-row justify-between p-10 font-mono font-bold text-white">
+    <nav class="flex flex-row justify-between p-10 font-mono text-white">
       <div class="flex items-center">
-        <a class="text-4xl" href="/">
+        <a class="text-4xl font-bold" href="/">
           <span class="text-blue-400">#</span>{title}
         </a>
       </div>
       <div class="flex flex-row gap-10 items-center">
         {Object.entries(PAGES)
-          .filter(([t, _]) => t !== title)
-          .map(([title, url]) =>
-            <a class="w-25 text-center" href={url}>{title}</a>
-          )
+          .map(([page, url]) => {
+            const selected = page === title ? "font-bold" : "";
+
+            return (
+              <a
+                class={`w-25 text-center hover:underline decoration-2 ${selected}`}
+                href={url}
+              >
+                {page}
+              </a>
+            );
+          })
         }
         <Button
           href="/resume.pdf"
@@ -35,6 +43,6 @@ export default function Navigation() {
           target="_blank"
         >resume</Button>
       </div>
-    </div>
+    </nav>
   );
 }

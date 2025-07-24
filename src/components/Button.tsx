@@ -6,18 +6,41 @@ type Props = {
   class?: string,
   href?: string,
   rel?: string,
+  style?: "flat" | "raised",
   target?: string,
 };
 
 export default function Button(props: Props) {
-  const style = "bg-sky-700 font-mono font-bold text-white p-3";
+  const base = "font-mono font-bold p-3";
+  const flat = `
+    inline-flex
+    border-3
+    hover:[background-image:repeating-radial-gradient(circle_at_center,transparent_0%_1px,#0003_1px_4px)]
+    hover:[background-size:2px_2px]
+    dark:text-white
+    dark:border-white
+    dark:hover:[background-image:repeating-radial-gradient(circle_at_center,transparent_0%_1px,#FFF3_1px_4px)]
+  `;
 
-  const shadow = "shadow-[4px_4px] shadow-sky-900";
-  const hover = "hover:shadow-[3px_3px] hover:translate-px";
-  const active = "hover:active:shadow-[2px_2px] hover:active:translate-[2px]";
+  const raised = `
+    bg-sky-700
+    text-white
+    shadow-[4px_4px]
+    shadow-sky-900
+    hover:shadow-[3px_3px]
+    hover:translate-px
+    hover:active:shadow-[2px_2px]
+    hover:active:translate-[2px]
+  `;
+
+  const style = addClass(
+    base,
+    props.style === "flat" ? flat : raised,
+    props.class,
+  );
 
   return <a
-    class={addClass(style, shadow, hover, active, props.class)}
+    class={style}
     href={props.href}
     rel={props.rel}
     target={props.target}

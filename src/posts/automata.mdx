@@ -1,0 +1,22 @@
+---
+title: Cool Cellular Automata
+author: Jeff Shelton
+date: 2025-07-22
+description: Cool Cellular Automata yay
+---
+
+import { CellState } from "@/components/Automaton";
+import { Automaton } from "@/components";
+
+export const thumbnail = () => (
+  <Automaton
+    class="w-full h-full"
+    colors={{
+      [CellState.DEAD]: [0, 0, 0, 255],
+      [CellState.ALIVE]: [255, 255, 255, 255],
+    }}
+    render="decay"
+    rule="conway"
+  />
+);
+

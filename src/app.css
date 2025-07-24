@@ -1,5 +1,5 @@
 @import "tailwindcss";
 
 @theme {
-  --font-mono: "Space Mono", monospace;
+  --font-mono: 'Cascadia Mono', monospace;
 }

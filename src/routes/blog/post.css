@@ -4,11 +4,12 @@ article {
 
   color: black;
 
-  font-family: 'Cascadia Mono';
+  font-family: var(--font-mono);
 }
 
 article header .title {
   font-size: 2rem;
+  text-align: center;
 }
 
 article header .author {
@@ -17,6 +18,14 @@ article header .author {
 
 article header .date {
 
+}
+
+article header hr {
+  height: 2px;
+  margin: 2rem 0 0.5rem 0;
+
+  border: none;
+  background-color: black;
 }
 
 article a {
@@ -29,18 +38,18 @@ article h1 {
   font-size: 1.5rem;
   font-weight: 700;
 
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 article h2 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: bold;
 
-  padding-top: 1rem;
+  margin-top: 1rem;
 }
 
 article p {
-  padding: 0.5rem 0;
+  padding-top: 1rem;
 }
 
 article ol {
@@ -49,14 +58,37 @@ article ol {
   padding: 0.5rem 0;
 }
 
+article ol li::marker {
+  color: var(--color-neutral-400);
+  font-weight: bold;
+}
+
 article ul {
   list-style-type: square;
   padding: 0.5rem 0;
   margin-left: 3ch;
 }
 
+article ul li::marker {
+  color: var(--color-neutral-400);
+}
+
+article code {
+  background-color: var(--color-neutral-300);
+  padding: 0 1ch;
+}
+
 @media (prefers-color-scheme: dark) {
   article {
     color: white;
   }
+
+  article header hr {
+    background-color: white;
+  }
+
+  article code {
+    background-color: var(--color-neutral-700);
+  }
+
 }

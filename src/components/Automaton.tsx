@@ -1,4 +1,5 @@
-import { onMount, onCleanup } from "solid-js";
+import { onMount, onCleanup, createMemo } from "solid-js";
+import { useSystemTheme } from "../system";
 
 /**
  * The state of a single cell in the grid.
@@ -13,16 +14,29 @@ export class CellGrid {
   readonly width: number;
   readonly height: number;
   readonly area: number;
+  readonly edge: CellState | undefined;
 
-  readonly front: Uint8Array;
-  readonly back: Uint8Array;
+  private readonly front: Uint8Array;
+  private readonly back: Uint8Array;
+  private useFront = false;
 
-  useFront = false;
-
-  constructor(width: number, height: number, old?: CellGrid | null) {
+  constructor(
+    width: number,
+    height: number,
+    old?: CellGrid | null,
+    edge?: CellState,
+  ) {
     this.width = width;
     this.height = height;
     this.area = width * height;
+
+    if (edge) {
+      this.edge = edge;
+    } else if (old && old.edge) {
+      this.edge = old.edge;
+    } else {
+      this.edge = undefined;
+    }
 
     this.front = new Uint8Array(this.area);
 
@@ -88,6 +102,10 @@ export class CellGrid {
   }
 
   index(x: number, y: number): CellState | undefined {
+    if (x < 0 || y < 0 || x >= this.width || y >= this.height) {
+      return this.edge;
+    }
+
     return this.inactive()[y * this.width + x];
   }
 
@@ -119,9 +137,20 @@ export class CellGrid {
   swap() {
     this.useFront = !this.useFront;
   }
+
+  spawnRandom(percent: number) {
+    const count = this.area * percent;
+
+    for (let i = 0; i < count; i++) {
+      const x = Math.floor(Math.random() * this.width);
+      const y = Math.floor(Math.random() * this.height);
+
+      this.set(x, y, CellState.ALIVE);
+    }
+  }
 }
 
-function conwayLife(grid: CellGrid, spawn: number) {
+function conwayLife(grid: CellGrid) {
   for (let y = 0; y < grid.height; y++) {
     for (let x = 0; x < grid.width; x++) {
       const neighbors = grid.neighbors(x, y);
@@ -145,18 +174,6 @@ function conwayLife(grid: CellGrid, spawn: number) {
       grid.set(x, y, alive ? CellState.ALIVE : CellState.DEAD);
     }
   }
-
-  // Choose a random selection of cells to make live.
-  const spawnCount = grid.area * spawn;
-
-  for (let r = 0; r < spawnCount; r++) {
-    const x = Math.floor(Math.random() * grid.width);
-    const y = Math.floor(Math.random() * grid.height);
-
-    grid.set(x, y, CellState.ALIVE);
-  }
-
-  grid.swap();
 }
 
 function brianBrain(grid: CellGrid) {
@@ -181,8 +198,6 @@ function brianBrain(grid: CellGrid) {
       }
     }
   }
-
-  grid.swap();
 }
 
 /**
@@ -248,25 +263,34 @@ function renderDecay(
 }
 
 /**
+ * The default color scheme for dark mode.
+ */
+const DEFAULT_COLORS = {
+  [CellState.DEAD]: [255, 255, 255, 0],
+  [CellState.ALIVE]: [255, 255, 255, 50],
+  [CellState.DYING]: [127, 127, 127, 50],
+};
+/**
  * Properties for an Automaton component.
  */
+
 export type Props = {
   /** Additional classes to be applied. */
   class?: string,
 
-  /** Color overrides for specified cell states. */
-  colors?: Partial<Record<CellState, number[]>>,
+  /** The implied cell state of the grid frame. */
+  edge?: CellState,
 
   /** The rendering speed, in frames per second. */
   fps?: number,
 
-  /** The update rule for the cells. */
-  rule?: "conway" | "brian",
-
   /**
    * The cell rendering rule.
    */
-  render?: "replace" | "decay",
+  render?: "decay" | "replace",
+
+  /** The update rule for the cells. */
+  rule?: "brian" | "conway",
 
   /**
    * The dimensions of the grid canvas, or "dynamic" for it to be automatically
@@ -279,13 +303,22 @@ export type Props = {
    * randomly selected to be made live.
    */
   spawnRate?: number,
-};
+} & ({
+  /**
+   * Color overrides for specified cell states, applying to any system theme.
+   */
+  colors?: Partial<Record<CellState, number[]>>,
+} | {
+  /**
+   * Color overrides for specified cell states, only under light theme.
+   */
+  lightColors?: Partial<Record<CellState, number[]>>,
 
-const DEFAULT_COLORS = {
-  [CellState.DEAD]: [255, 255, 255, 0],
-  [CellState.ALIVE]: [255, 255, 255, 50],
-  [CellState.DYING]: [127, 127, 127, 50],
-};
+  /**
+   * Color overrides for specified cell states, only under dark theme.
+   */
+  darkColors?: Partial<Record<CellState, number[]>>,
+});
 
 /**
  * A component rendering a cellular automaton with defined rules.
@@ -293,10 +326,10 @@ const DEFAULT_COLORS = {
  * @param props - The properties of the component.
  */
 export default function Automaton(props: Props) {
-  const fps = props.fps !== undefined ? props.fps : 20;
+  const fps = props.fps ?? 20;
   const frameRate = 1000.0 / fps;
 
-  const spawnRate = props.spawnRate !== undefined ? props.spawnRate : 0.001;
+  const spawnRate = props.spawnRate ?? 0.001;
   const spawnPerFrame = spawnRate / fps;
 
   let updateCells = conwayLife;
@@ -309,7 +342,21 @@ export default function Automaton(props: Props) {
     drawCells = renderDecay;
   }
 
-  const colors = { ...DEFAULT_COLORS, ...props.colors };
+  const systemTheme = useSystemTheme();
+  const colors = createMemo(() => {
+    const theme = systemTheme();
+
+    let overrides;
+    if ("colors" in props) {
+      overrides = props.colors;
+    } else if ("lightColors" in props) {
+      overrides = theme === "light"
+        ? props.lightColors
+        : props.darkColors;
+    }
+
+    return { ...DEFAULT_COLORS, ...overrides };
+  });
 
   let dynamic = !props.size || props.size === "dynamic";
   let canvas!: HTMLCanvasElement;
@@ -351,7 +398,7 @@ export default function Automaton(props: Props) {
           return;
         }
 
-        grid = new CellGrid(width, height, grid);
+        grid = new CellGrid(width, height, grid, props.edge);
         frame = context.createImageData(width, height);
       });
 
@@ -360,7 +407,7 @@ export default function Automaton(props: Props) {
       const [width, height] = props.size as number[];
 
       frame = context.createImageData(width, height);
-      grid = new CellGrid(width, height);
+      grid = new CellGrid(width, height, null, props.edge);
     }
 
     function tick(time: number) {
@@ -376,8 +423,11 @@ export default function Automaton(props: Props) {
 
       lastTime = time;
 
-      updateCells(grid, spawnPerFrame);
-      drawCells(grid, colors, frame);
+      updateCells(grid);
+      grid.spawnRandom(spawnPerFrame);
+      grid.swap();
+
+      drawCells(grid, colors(), frame);
 
       // Push the image data onto the canvas.
       context.putImageData(frame, 0, 0);

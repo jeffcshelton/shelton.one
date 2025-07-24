@@ -1,59 +1,68 @@
 import { Automaton, Box, Navigation } from "@/components";
-import { CellState } from "@/components/Automaton";
-import { JSX } from "solid-js";
+import { Component, For } from "solid-js";
+import { posts } from "~/posts";
 
 type PostProps = {
-  children: JSX.Element,
-  date: string,
+  metadata?: {
+    date?: string,
+    description?: string,
+    title?: string,
+  },
+  slug: string,
+  thumbnail?: Component,
 };
 
-function Post(props: PostProps) {
+/**
+ * A card that represents a blog post, with a short description.
+ *
+ * @param props - The properties of the component.
+ */
+function PostCard(props: PostProps) {
+  const { date, description, title } = props.metadata ?? {};
+
   return (
     <div class="w-full max-w-[100ch]">
-      <Box title={props.date}>
+      <Box href={`/blog/${props.slug}`} title={date}>
         <div class="flex flex-row">
-          {props.children}
+          <div class="w-50 h-50">
+            {props.thumbnail && <props.thumbnail />}
+          </div>
+          <div class="flex flex-col m-[2ch] gap-[1em]">
+            {title && <h1 class="font-bold text-xl">{title}</h1>}
+            {description && <p>{description}</p>}
+          </div>
         </div>
       </Box>
     </div>
   );
 }
 
+/**
+ * The page showing all blog posts in cards.
+ */
 export default function Blog() {
   return (
-    <div class="flex flex-col w-full h-full">
+    <div class="relative min-w-screen min-h-screen">
       <Automaton
-        class="absolute -z-10 inset-0 w-full h-full"
+        class="absolute w-full h-full -z-1"
         render="decay"
         rule="conway"
       />
+      <div class="flex flex-col w-full h-full">
+        <Navigation />
 
-      <Navigation />
-
-      <main class="flex flex-1 flex-col items-center">
-        <Post date="2025-07-21">
-          <Automaton
-            class="w-50 h-50"
-            colors={{
-              [CellState.DEAD]: [0, 0, 0, 255],
-              [CellState.ALIVE]: [255, 255, 255, 255],
-            }}
-            render="decay"
-            rule="conway"
-          />
-
-          <div class="flex flex-col m-[2ch] gap-[1em]">
-            <h1 class="font-bold text-xl">Cellular Automata</h1>
-            <p>On my home page,</p>
-          </div>
-        </Post>
-        <Post date="2025-07-21">
-          <div class="flex flex-col m-[2ch] gap-[1em]">
-            <h1 class="font-bold text-xl">Writing Your First Linux Kernel Driver</h1>
-            <p>Recently, I wrote my first Linux kernel driver.<br />Read to find out how you can write one too...</p>
-          </div>
-        </Post>
-      </main>
+        <main class="flex flex-1 flex-col items-center">
+          <For each={Object.entries(posts)}>
+            {([slug, { metadata, thumbnail }]) => (
+              <PostCard
+                metadata={metadata}
+                slug={slug}
+                thumbnail={thumbnail}
+              />
+            )}
+          </For>
+        </main>
+      </div>
     </div>
   );
 }
