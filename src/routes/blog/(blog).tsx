@@ -1,46 +1,15 @@
-import { Automaton, Box, Navigation } from "@/components";
-import { Component, For } from "solid-js";
+import { Automaton, Card, Navigation } from "@/components";
 import { posts } from "~/posts";
-
-type PostProps = {
-  metadata?: {
-    date?: string,
-    description?: string,
-    title?: string,
-  },
-  slug: string,
-  thumbnail?: Component,
-};
-
-/**
- * A card that represents a blog post, with a short description.
- *
- * @param props - The properties of the component.
- */
-function PostCard(props: PostProps) {
-  const { date, description, title } = props.metadata ?? {};
-
-  return (
-    <div class="w-full max-w-[100ch]">
-      <Box href={`/blog/${props.slug}`} title={date}>
-        <div class="flex flex-row">
-          <div class="w-50 h-50">
-            {props.thumbnail && <props.thumbnail />}
-          </div>
-          <div class="flex flex-col m-[2ch] gap-[1em]">
-            {title && <h1 class="font-bold text-xl">{title}</h1>}
-            {description && <p>{description}</p>}
-          </div>
-        </div>
-      </Box>
-    </div>
-  );
-}
+import { For } from "solid-js";
 
 /**
  * The page showing all blog posts in cards.
  */
 export default function Blog() {
+  const visiblePosts = Object
+    .entries(posts)
+    .filter(([slug, _]) => !slug.startsWith("_"));
+
   return (
     <div class="relative min-w-screen min-h-screen">
       <Automaton
@@ -52,15 +21,26 @@ export default function Blog() {
         <Navigation />
 
         <main class="flex flex-1 flex-col items-center">
-          <For each={Object.entries(posts)}>
-            {([slug, { metadata, thumbnail }]) => (
-              <PostCard
-                metadata={metadata}
-                slug={slug}
-                thumbnail={thumbnail}
-              />
-            )}
-          </For>
+          {visiblePosts.length > 0
+            ? (
+              <For each={visiblePosts}>
+                {([slug, { metadata, thumbnail }]) => (
+                  <Card
+                    date={metadata?.date}
+                    description={metadata?.description}
+                    href={`/blog/${slug}`}
+                    subtitle={metadata?.subtitle}
+                    title={metadata?.title}
+                    thumbnail={thumbnail}
+                  />
+                )}
+              </For>
+            ) : (
+              <h1 class="font-mono text-white text-2xl mt-20">
+                Some posts will be here soon :)
+              </h1>
+            )
+          }
         </main>
       </div>
     </div>

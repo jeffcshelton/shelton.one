@@ -4,7 +4,6 @@ import { Button } from "@/components";
 const PAGES = {
   "me": "/",
   "blog": "/blog",
-  "projects": "/projects",
   "github": "https://github.com/jeffcshelton",
 };
 

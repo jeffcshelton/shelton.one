@@ -7,6 +7,7 @@ type PostModule = {
   default: Component,
   frontmatter?: {
     title?: string,
+    subtitle?: string,
     author?: string,
     date?: string,
     description?: string,
