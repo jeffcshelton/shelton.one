@@ -90,7 +90,7 @@
           mkdir -p $out
           cp -r .output/. $out/
         '';
-        npmDepsHash = "sha256-HnOyIqRZclK0d4BUpzNZClQMp3X/km8mWUr1GPAPD8E=";
+        npmDepsHash = "sha256-AbraXPL4osQhymS6t1tY6aohjcO1wLhjOCIANMyBNCo=";
         pname = "shelton.one";
         src = self;
         version = "1.0.0";
