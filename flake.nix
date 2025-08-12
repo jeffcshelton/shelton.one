@@ -7,7 +7,7 @@
       url = "github:numtide/flake-utils";
     };
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     systems.url = "github:nix-systems/default";
   };
 
@@ -43,7 +43,7 @@
             Environment = "PORT=80";
 
             # Start the service with Node.js.
-            ExecStart = "${pkgs.nodejs_24}/bin/node ${pkg}/server/index.mjs";
+            ExecStart = "${pkgs.nodejs_22}/bin/node ${pkg}/server/index.mjs";
 
             # Always restart the service if it crashes.
             Restart = "always";
@@ -80,7 +80,7 @@
     in
     {
       devShells.default = pkgs.mkShell {
-        buildInputs = [ pkgs.nodejs_24 ];
+        buildInputs = [ pkgs.nodejs_22 ];
         name = "shelton.one";
         version = "1.0.0";
       };
